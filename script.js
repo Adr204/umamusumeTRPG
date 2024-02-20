@@ -1,13 +1,26 @@
 console.log(2);
 window.addEventListener("load", e => {
+    let jsonData = {
+        skillList: {}
+    };
+    fetch("./uniqueSkillList.json")
+        .then(e => {return e.json();})
+        .then(jsondata => {
+            console.log(jsondata);
+            jsonData.skillList = jsondata;
+            init(jsonData);
+        });
+})
+
+function init(jsonData) {
     let btn = document.getElementById("naming");
     btn.addEventListener("click", naming);
 
     let inputElem = document.querySelectorAll("select");
     [...inputElem].forEach(e => {
         e.addEventListener("change",() => {
-            ctx.drawImage(img, 0, 0);
-            putStatus(ctx);
+            ctx.drawImage(sheet, 0, 0);
+            putStatus(jsonData.skillList, ctx);
         })
     })
 
@@ -30,19 +43,42 @@ window.addEventListener("load", e => {
         upStat.children[index].setAttribute("disabled", "");
     });
 
-
     let canvas = document.getElementById("sheet");
     // let ctx = canvas.getContext("2d");
     window.ctx = canvas.getContext("2d");
     
 
-    let img = document.getElementById("origin");
-    canvas.height = img.height;
-    canvas.width = img.width;
-    ctx.drawImage(img ,0 ,0);
-    img.remove();
+    let sheet = document.getElementById("origin");
+    canvas.height = sheet.height;
+    canvas.width = sheet.width;
+    ctx.drawImage(sheet ,0 ,0);
+    sheet.remove();
 
-    ctx.font = '26px sans-serif';
+    let upload = document.getElementById("upload");
+    upload.addEventListener("change", e => {
+        let img = document.createElement("img");
+        img.addEventListener("load", () => {
+            // TODO
+            // 画像のトリミングなどの処理を加える
+            let maxLen = Math.max(img.width, img.height);
+            let sx = (img.width  - maxLen) / 2;
+            let sy = (img.height - maxLen) / 2;
+            
+            let color = ctx.fillStyle;
+            ctx.fillStyle = "white";
+            ctx.fillRect(921, 105, 200, 200);
+            ctx.drawImage(img, sx, sy, maxLen, maxLen, 921, 105, 200, 200);
+            ctx.fillStyle = color;
+        });
+
+        const file_reader = new FileReader();
+        file_reader.addEventListener('load', () => {
+            const uploaded_image = file_reader.result;
+            img.src = uploaded_image;
+        });
+        file_reader.readAsDataURL(e.target.files[0]);
+    })
+
     // クリックイベントの登録
   canvas.onclick = function(e) {
     // 一度描画をクリア
@@ -60,22 +96,23 @@ window.addEventListener("load", e => {
 
     console.log(mouseX, mouseY);
     }
-})
+}
 
 function getSelect() {
     let c = {
-        classId  :document.getElementById("class").value,
-        typeId   :document.getElementById("type") .value,
-        coverId  :document.getElementById("cover").value,
-        upStat   :document.getElementById("good") .value,
-        downStat :document.getElementById("bad")  .value
+        classId : document.getElementById("class").value,
+        typeId  : document.getElementById("type") .value,
+        coverId : document.getElementById("cover").value,
+        upStat  : document.getElementById("good") .value,
+        downStat: document.getElementById("bad")  .value,
+        skillId : document.getElementById("skill").value
     };
     return c;
 }
 
 function naming() {
     let c = getSelect();
-    if(c.classId * c.typeId * c.coverId * c.upStat * c.downStat == 0) {
+    if(c.classId * c.typeId * c.coverId * c.upStat * c.downStat * c.skillId == 0) {
         alert("いずれかのフォームが入力されていません");
         return -1;
     }
@@ -84,7 +121,7 @@ function naming() {
     ctx.fillText(name, 310, 105);
 }
 
-function putStatus(ctx) {
+function putStatus(skillData, ctx) {
     let c = getSelect();
 
     let status = [0, 0, 0, 0, 0, 0];
@@ -170,6 +207,7 @@ function putStatus(ctx) {
         "ユニーク"
     ];
 
+    ctx.font = "26px sans-serif";
     putClass(classData[c.classId].name, ctx);
     putType (typeData [c.typeId] .name, ctx);
     putCover(coverData[c.coverId]     , ctx);
@@ -181,6 +219,8 @@ function putStatus(ctx) {
     }
     
     setGood(status, ctx);
+
+    setSkill(skillData[c.skillId], 0, ctx);
 };
 
 function putClass(text, ctx) {
@@ -198,3 +238,42 @@ function setGood(field, ctx) {
         ctx.fillText(field[i], 850, 125+47*i);
     }
 };
+
+function setSkill(skill, number, ctx) {
+    ctx.font = "16px sans-serif";
+
+    console.log(skill);
+    ctx.fillText(skill.name, 305, 424.5);
+    let timing = "";
+    skill.timing.forEach((e, i) => {
+        if(i) timing += ", ";
+        switch (e) {
+            case "シナリオフェイズ": timing += "シナ"; break;
+            case "ゴール前": timing += "G前"; break;
+            case "スタート": timing += "S"; break;
+            case "第２": timing += "2"; break;
+            case "第３": timing += "3"; break;
+            default: timing += e; break;
+        }
+    })
+    ctx.fillText(timing, 570, 424.5);
+    ctx.fillText(skill.spirit, 700, 424.5);
+
+    // ctx.font = "26px sans-serif";
+    ctx.fillText(skill.number_of_uses, 700, 458.5);
+
+    setDetail(skill.detail, ctx);
+}
+
+function setDetail(text, ctx) {
+    let fontSize = 8;
+    ctx.font = `${fontSize}px sans-serif`;
+    let lineHeight = 1.2 ;	// 行の高さ (フォントサイズに対する倍率)
+
+    // 1行ずつ描画
+    let lines = text.split("\n");
+    for(let i = 0; i < lines.length; i++) {
+        let addY = fontSize * lineHeight * i;
+        ctx.fillText(lines[i], 290, 442 + addY) ;
+    }
+}
