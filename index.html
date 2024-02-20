@@ -57,9 +57,39 @@
             <option value="5">友</option>
             <option value="6">噂</option>
         </select>
+        <select name="" id="skill">
+            <option value="0" selected disabled>固有スキル:未選択</option>
+            <option value="1">逃げスパート</option>
+            <option value="2">先行スパート</option>
+            <option value="3">差しスパート</option>
+            <option value="4">追い込みスパート</option>
+            <option value="5">神童</option>
+            <option value="6">爆逃げ上等☆</option>
+            <option value="7">嵐を呼ぶウマ娘</option>
+            <option value="8">傾向と対策</option>
+            <option value="9">八方睨み</option>
+            <option value="10">名家の誇り</option>
+            <option value="11">ハングリー精神</option>
+            <option value="12">スペシャル・コーデ</option>
+            <option value="13">お一人さま</option>
+            <option value="14">変幻自在</option>
+            <option value="15">理想のライン</option>
+            <option value="16">七転び八起き</option>
+            <option value="17">スーパーラッキーセブン</option>
+            <option value="18">完全なる伏兵</option>
+            <option value="19">奇策縦横</option>
+            <option value="20">天性のアイドルウマ娘☆</option>
+        </select>
         <button id="naming">名付けを行う</button>
     </div>
     <img src="./charactorsheet.jpg" alt="" id="origin">
+    <div style="display: flex;">
+        <form enctype="multipart/form-data">
+            <!--アップロードボタンを用意する-->
+            <input type="file" accept="image/*" id="upload">
+        </form>
+        <span>←画像アップロード</span>
+    </div>
     <canvas id="sheet"></canvas>
     <script src="./script.js"></script>
 </body>
