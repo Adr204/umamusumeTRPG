@@ -3,8 +3,9 @@ window.addEventListener("load", e => {
     let jsonData = {
         skillList: {}
     };
+    console.log("loaded");
     fetch("./uniqueSkillList.json")
-        .then(e => {return e.json();})
+        .then(e => {return e.json();}).catch(console.error)
         .then(jsondata => {
             console.log(jsondata);
             jsonData.skillList = jsondata;
@@ -13,6 +14,7 @@ window.addEventListener("load", e => {
 })
 
 function init(jsonData) {
+    console.log("initialize");
     let btn = document.getElementById("naming");
     btn.addEventListener("click", naming);
 
