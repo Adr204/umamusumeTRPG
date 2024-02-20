@@ -15,6 +15,7 @@ window.addEventListener("load", e => {
 
 function init(jsonData) {
     console.log("initialize");
+    
     let btn = document.getElementById("naming");
     btn.addEventListener("click", naming);
 
@@ -22,7 +23,8 @@ function init(jsonData) {
     [...inputElem].forEach(e => {
         e.addEventListener("change",() => {
             ctx.drawImage(sheet, 0, 0);
-            putStatus(jsonData.skillList, ctx);
+            setStatus(jsonData.skillList, ctx);
+            setPicture(charactorImg, ctx);
         })
     })
 
@@ -57,26 +59,17 @@ function init(jsonData) {
     sheet.remove();
 
     let upload = document.getElementById("upload");
+    let charactorImg = document.createElement("img");
     upload.addEventListener("change", e => {
-        let img = document.createElement("img");
-        img.addEventListener("load", () => {
-            // TODO
-            // 画像のトリミングなどの処理を加える
-            let maxLen = Math.max(img.width, img.height);
-            let sx = (img.width  - maxLen) / 2;
-            let sy = (img.height - maxLen) / 2;
-            
-            let color = ctx.fillStyle;
-            ctx.fillStyle = "white";
-            ctx.fillRect(921, 105, 200, 200);
-            ctx.drawImage(img, sx, sy, maxLen, maxLen, 921, 105, 200, 200);
-            ctx.fillStyle = color;
+        charactorImg.addEventListener("load", () => {
+            console.log("img_load");
+            setPicture(charactorImg, ctx);
         });
 
         const file_reader = new FileReader();
         file_reader.addEventListener('load', () => {
             const uploaded_image = file_reader.result;
-            img.src = uploaded_image;
+            charactorImg.src = uploaded_image;
         });
         file_reader.readAsDataURL(e.target.files[0]);
     })
@@ -120,10 +113,11 @@ function naming() {
     }
 
     let name = document.getElementById("name").value;
+    ctx.font = "26px sans-serif";
     ctx.fillText(name, 310, 105);
 }
 
-function putStatus(skillData, ctx) {
+function setStatus(skillData, ctx) {
     let c = getSelect();
 
     let status = [0, 0, 0, 0, 0, 0];
@@ -210,9 +204,9 @@ function putStatus(skillData, ctx) {
     ];
 
     ctx.font = "26px sans-serif";
-    putClass(classData[c.classId].name, ctx);
-    putType (typeData [c.typeId] .name, ctx);
-    putCover(coverData[c.coverId]     , ctx);
+    setClass(classData[c.classId].name, ctx);
+    setType (typeData [c.typeId] .name, ctx);
+    setCover(coverData[c.coverId]     , ctx);
     for(let i = 0; i < 6; i++) {
         status[i] += classData[c.classId].stat[i];
         status[i] += typeData[c.typeId]  .stat[i];
@@ -221,17 +215,16 @@ function putStatus(skillData, ctx) {
     }
     
     setGood(status, ctx);
-
     setSkill(skillData[c.skillId], 0, ctx);
 };
 
-function putClass(text, ctx) {
+function setClass(text, ctx) {
     ctx.fillText(text, 325, 155);
 };
-function putType(text, ctx) {
+function setType(text, ctx) {
     ctx.fillText(text, 325, 202.5);
 };
-function putCover(text, ctx) {
+function setCover(text, ctx) {
     ctx.fillText(text, 325, 250);
 };
 
@@ -278,4 +271,16 @@ function setDetail(text, ctx) {
         let addY = fontSize * lineHeight * i;
         ctx.fillText(lines[i], 290, 442 + addY) ;
     }
+}
+
+function setPicture(img, ctx) {
+    let maxLen = Math.max(img.width, img.height);
+    let sx = (img.width  - maxLen) / 2;
+    let sy = (img.height - maxLen) / 2;
+    
+    let color = ctx.fillStyle;
+    ctx.fillStyle = "white";
+    ctx.fillRect(921, 105, 200, 200);
+    ctx.drawImage(img, sx, sy, maxLen, maxLen, 921, 105, 200, 200);
+    ctx.fillStyle = color;
 }
