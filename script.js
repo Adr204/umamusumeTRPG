@@ -10,7 +10,7 @@ window.addEventListener("load", e => {
             console.log(jsondata);
             jsonData.skillList = jsondata;
             init(jsonData);
-        });
+        }).catch();
 })
 
 function init(jsonData) {
@@ -325,6 +325,12 @@ function setPicture(img, ctx) {
 
 function output(name) {
     let status = getStatus(getSelect()).status;
-    let text = `{"kind":"character","data":{"name":"${name}","commands":"{故障:0}","status":[],"params":[{"label":"競","value":"${status[0]}"},{"label":"練","value":"${status[1]}"},{"label":"体","value":"${status[2]}"},{"label":"心","value":"${status[3]}"},{"label":"友","value":"${status[4]}"},{"label":"噂","value":"${status[5]}"}]}}`;
-    navigator.clipboard.writeText(text)
+    let command = "";
+    for(let i = 0; i < 15; i++) {
+        if(i) command += "\\n";
+        command += `{気合:${i+1}} 【故障チェック:${i+1}】`;
+    }
+    let spilit = '{"label":"気合:1","value":"1D6"},{"label":"気合:2","value":"1D6+2"},{"label":"気合:3","value":"2D6"},{"label":"気合:4","value":"3D6"},{"label":"気合:5","value":"3D6+1"},{"label":"気合:6","value":"4D6"},{"label":"気合:7","value":"5D6"},{"label":"気合:8","value":"5D6+1"},{"label":"気合:9","value":"5D6+2"},{"label":"気合:10","value":"6D6"},{"label":"気合:11","value":"5D6"},{"label":"気合:12","value":"5D6-1"},{"label":"気合:13","value":"5D6-2"},{"label":"気合:14","value":"4D6-1"},{"label":"気合:15","value":"4D6-2"}'
+    let text = `{"kind":"character","data":{"name":"${name}","commands":"${command}","status":[],"params":[{"label":"競","value":"${status[0]}"},{"label":"練","value":"${status[1]}"},{"label":"体","value":"${status[2]}"},{"label":"心","value":"${status[3]}"},{"label":"友","value":"${status[4]}"},{"label":"噂","value":"${status[5]}"},${spilit}]}}`;
+    navigator.clipboard.writeText(text);
 }
