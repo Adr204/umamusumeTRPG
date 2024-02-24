@@ -35,7 +35,7 @@ function init(jsonData) {
         for(let i = 0; i < 6; i++) {
             downStat.children[i+1].removeAttribute("disabled");
         }
-        let index = Number(e.target.value)+1;
+        let index = Number(e.target.value);
         downStat.children[index].setAttribute("disabled", "");
     });
     downStat.addEventListener('change', e => {
@@ -43,7 +43,7 @@ function init(jsonData) {
         for(let i = 0; i < 6; i++) {
             upStat.children[i+1].removeAttribute("disabled");
         }
-        let index = Number(e.target.value)+1;
+        let index = Number(e.target.value);
         upStat.children[index].setAttribute("disabled", "");
     });
 
@@ -75,22 +75,18 @@ function init(jsonData) {
     })
 
     // クリックイベントの登録
-  canvas.onclick = function(e) {
-    // 一度描画をクリア
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.onclick = function(e) {
 
     // クリック位置の座標計算（canvasの左上を基準。-2ずつしているのはborderの分）
     var rect = e.target.getBoundingClientRect();
     mouseX = e.clientX - Math.floor(rect.left) - 2;
     mouseY = e.clientY - Math.floor(rect.top) - 2;
 
-    // クリック位置を中心に円を描画
-    // ctx.beginPath();
-    // ctx.arc(mouseX, mouseY, 5, 0, Math.PI * 2, false);
-    // ctx.fill();
-
     console.log(mouseX, mouseY);
     }
+    // TODO
+    // 各ステータスをクリックすることで数値に補正をかけれるように変更する
+    // 1(+2) といった感じに大きく合計値を表示し、小さく補正値を表示する感じ
 }
 
 function getSelect() {
@@ -105,22 +101,7 @@ function getSelect() {
     return c;
 }
 
-function naming() {
-    let c = getSelect();
-    if(c.classId * c.typeId * c.coverId * c.upStat * c.downStat * c.skillId == 0) {
-        alert("いずれかのフォームが入力されていません");
-        return -1;
-    }
-
-    let name = document.getElementById("name").value;
-    ctx.font = "26px sans-serif";
-    ctx.fillText(name, 310, 105);
-}
-
-function setStatus(skillData, ctx) {
-    let c = getSelect();
-
-    let status = [0, 0, 0, 0, 0, 0];
+function getClass(classId) {
     let classData = [
         {
             name: "",
@@ -159,6 +140,11 @@ function setStatus(skillData, ctx) {
             stat: [1, 0, 0, 0, 0, 1]
         },    
     ];
+
+    return classData[classId];
+}
+
+function getType(typeId) {
     let typeData = [
         {
             name: "",
@@ -196,25 +182,73 @@ function setStatus(skillData, ctx) {
             stat: [0, 0, 0, 0, 1, 0]
         }
     ];
+
+    return typeData[typeId];
+}
+
+function getCover(coverId) {
     let coverData = [
-        "",
-        "アクティブ",
-        "スマート",
-        "ユニーク"
+        {
+            "name": ""
+        },
+        {
+            "name": "アクティブ"
+        },
+        {
+            "name": "スマート"
+        },
+        {
+            "name": "ユニーク"
+        }
     ];
 
-    ctx.font = "26px sans-serif";
-    setClass(classData[c.classId].name, ctx);
-    setType (typeData [c.typeId] .name, ctx);
-    setCover(coverData[c.coverId]     , ctx);
+    return coverData[coverId];
+}
+
+function getStatus(c) {
+    let status = [0, 0, 0, 0, 0, 0];
+    let classData = getClass(c.classId);
+    let typeData = getType(c.typeId);
+    let coverData = getCover(c.coverId);
+
     for(let i = 0; i < 6; i++) {
-        status[i] += classData[c.classId].stat[i];
-        status[i] += typeData[c.typeId]  .stat[i];
+        status[i] += classData.stat[i];
+        status[i] += typeData .stat[i];
         if(c.upStat-1   == i) status[i] += 1;
         if(c.downStat-1 == i) status[i] -= 1;
     }
+
+    return {
+        status: status,
+        class:  classData,
+        type:   typeData,
+        cover:  coverData
+    };
+}
+
+function naming() {
+    let c = getSelect();
+    if(c.classId * c.typeId * c.coverId * c.upStat * c.downStat * c.skillId == 0) {
+        alert("いずれかのフォームが入力されていません");
+        return -1;
+    }
+
+    let name = document.getElementById("name").value;
+    ctx.font = "26px sans-serif";
+    ctx.fillText(name, 310, 105);
+    output(name);
+}
+
+function setStatus(skillData, ctx) {
+    let c = getSelect();
+    let d = getStatus(c);
     
-    setGood(status, ctx);
+    ctx.font = "26px sans-serif";
+    setClass(d.class.name, ctx);
+    setType (d.type.name , ctx);
+    setCover(d.cover.name, ctx);
+    
+    setGood(d.status, ctx);
     setSkill(skillData[c.skillId], 0, ctx);
 };
 
@@ -234,6 +268,9 @@ function setGood(field, ctx) {
     }
 };
 
+// TODO
+// 二つ目,三つ目のスキルを表示できるようにする
+// 説明文をどうにかする
 function setSkill(skill, number, ctx) {
     ctx.font = "16px sans-serif";
 
@@ -257,7 +294,8 @@ function setSkill(skill, number, ctx) {
     // ctx.font = "26px sans-serif";
     ctx.fillText(skill.number_of_uses, 700, 458.5);
 
-    setDetail(skill.detail, ctx);
+    // 枠に入り切らないからコメントアウト
+    // setDetail(skill.detail, ctx);
 }
 
 function setDetail(text, ctx) {
@@ -283,4 +321,10 @@ function setPicture(img, ctx) {
     ctx.fillRect(921, 105, 200, 200);
     ctx.drawImage(img, sx, sy, maxLen, maxLen, 921, 105, 200, 200);
     ctx.fillStyle = color;
+}
+
+function output(name) {
+    let status = getStatus(getSelect()).status;
+    let text = `{"kind":"character","data":{"name":"${name}","commands":"{故障:0}","status":[],"params":[{"label":"競","value":"${status[0]}"},{"label":"練","value":"${status[1]}"},{"label":"体","value":"${status[2]}"},{"label":"心","value":"${status[3]}"},{"label":"友","value":"${status[4]}"},{"label":"噂","value":"${status[5]}"}]}}`;
+    navigator.clipboard.writeText(text)
 }
